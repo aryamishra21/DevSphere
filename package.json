@@ -1,0 +1,20 @@
+{
+  "name": "devsphere",
+  "version": "1.0.0",
+  "description": " A global hub for developers to network.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "nodejs",
+    "javascript"
+  ],
+  "author": "Arya Mishra",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
