@@ -1,0 +1,11 @@
+- npm init
+- npm i mongodb
+- npm i express
+- created server using express
+- created cluster on mongodb website 
+- get connection string
+- create db in mongoDB compass 
+- npm i mongoose
+- connect to database 'connectionURL'/dbname before starting server
+- created user schema
+- created signup API, made it dynamic to recieve data from end user
