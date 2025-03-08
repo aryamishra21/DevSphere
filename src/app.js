@@ -1,7 +1,8 @@
 const express = require("express");
 const app = express();
 const connectDB=require('./config/database')
-const User=require('./models/user')
+const User=require('./models/user');
+const user = require("./models/user");
 
 connectDB().then(()=>{
     console.log('db connected !')
@@ -13,6 +14,8 @@ connectDB().then(()=>{
     console.log('db cannot be connected ',err)
 })
 app.use(express.json())    // converts json from request to js object      used to convert body to pass to user model to save in db
+
+// create user
 app.post('/signup',async(req,res)=>{
     console.log(req.body)
     // creates new instance of user model
@@ -32,6 +35,75 @@ app.post('/signup',async(req,res)=>{
     // await user.save()
     // res.send('User created successfully')
 })
+
+// find user
+app.get('/user',async (req,res)=>{
+    const userEmail=req.body.emailId;
+    try{
+        const users=await User.find({emailId:userEmail})
+        if (users.length===0){
+            res.status(404).send('User not found')
+        }
+        else{
+            res.send(users)
+        }
+    }
+    catch{
+        res.status(400).send('Something went wrong')
+    }
+})
+
+
+// feed get all users
+app.get('/feed',async(req,res)=>{
+    try{
+        const allUsers=await User.find({})
+        if (allUsers.length===0){
+            res.status(404).send('No users found')
+        }
+        else{
+            res.send(allUsers)
+        }
+    }
+    catch{
+        res.status(400).send('Something went wrong')
+    }
+})
+
+
+// delete user by id
+app.delete('/user',async(req,res)=>{
+    // const emailid=req.body.emailId
+    const id=req.body.userId
+    try{
+        // await User.findByIdAndDelete({_id:id})
+        await User.findByIdAndDelete(id)
+        //delete by email id
+        // await User.findOneAndDelete({"emailId":emailid}) or deleteOne
+        res.send('User deleted successfully')
+    }
+    catch{
+        res.status(400).send('Something went wrong')
+    }
+})
+
+// update user 
+app.patch('/user',async(req,res)=>{
+    const id=req.body.userId
+    const data=req.body
+    try{
+        const user=await User.findByIdAndUpdate({'_id':id},data,{returnDocument:"after",runValidators:true})
+        console.log(user)
+        res.send('User updated successfully')
+        // user.findOneAndUpdate User.updateOne User.updateMany
+    }
+    catch{
+        res.status(400).send('Something went wrong')
+    }
+})
+
+
+
 
 // app.use('/',(err,req,res,next)=>{
 //     if(err){
