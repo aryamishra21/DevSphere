@@ -3,7 +3,8 @@ const app = express();
 const connectDB=require('./config/database')
 const User=require('./models/user');
 const user = require("./models/user");
-
+const validateSignUpData = require("./utils/validateSignUpData");
+const bcrypt =require("bcrypt")
 connectDB().then(()=>{
     console.log('db connected !')
     app.listen(1262, () => {
@@ -19,8 +20,26 @@ app.use(express.json())    // converts json from request to js object      used 
 app.post('/signup',async(req,res)=>{
     console.log(req.body)
     // creates new instance of user model
-    const user=new User(req.body)
-    try{
+    // const user=new User(req.body)
+    
+    try{ 
+        //validation of data
+        validateSignUpData(req)
+        const {firstName,lastName,emailId,password}=req.body
+        const checkEmail=await User.findOne({emailId:emailId})
+        if(checkEmail){
+            throw new Error("User already exists")
+        }
+        
+        //Encrypt the password
+        const passwordHash= await bcrypt.hash(password, 10);
+        
+        const user=new User({
+            firstName,
+            lastName,
+            emailId,
+            password:passwordHash
+        })
         await user.save()
         res.send('User added successfully')
     }
@@ -34,6 +53,27 @@ app.post('/signup',async(req,res)=>{
     // })
     // await user.save()
     // res.send('User created successfully')
+})
+
+app.post('/login',async(req,res)=>{
+    const {emailId, password}=req.body
+    try{
+        const userinDB=await User.findOne({emailId:emailId})
+        console.log(userinDB)
+        if(!userinDB){
+            throw new Error("Invalid Credentials")
+        }
+        const checkPassword=await bcrypt.compare(password, userinDB.password)
+        if(checkPassword){
+            res.send("logged in successfully")
+        }
+        else{
+            throw new Error("Invalid Credentials")
+        }
+    }
+    catch(err){
+        res.send("ERROR: "+err.message)
+    }
 })
 
 // find user
@@ -88,17 +128,29 @@ app.delete('/user',async(req,res)=>{
 })
 
 // update user 
-app.patch('/user',async(req,res)=>{
-    const id=req.body.userId
+app.patch('/user/:userId',async(req,res)=>{
+    const id=req.params?.userId
     const data=req.body
     try{
+        // restricting important field update
+        ALLOWED_UPDATES=["photoUrl","about","skills","gender","age"]
+        const isUpdateAllowed=Object.keys(data).every((k)=>ALLOWED_UPDATES.includes(k))
+        if(!isUpdateAllowed){
+            throw new Error("Update not allowed")
+        }
+        if(data?.about.length>200){
+            throw new Error("About should be less than 200 words")
+        }
+        if(data?.skills.length>10){
+            throw new Error("Skills should be less than or equal to 10")
+        }
         const user=await User.findByIdAndUpdate({'_id':id},data,{returnDocument:"after",runValidators:true})
         console.log(user)
         res.send('User updated successfully')
         // user.findOneAndUpdate User.updateOne User.updateMany
     }
-    catch{
-        res.status(400).send('Something went wrong')
+    catch(err){
+        res.status(400).send('Something went wrong: '+err.message)
     }
 })
 

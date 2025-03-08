@@ -10,4 +10,5 @@
 - created user schema
 - created signup API, made it dynamic to recieve data from end user
 - created read, delete, update user API 
-- added validations, timestamp
+- Data sanitizing - added Schema(DB), API level validations, timestamp, validator lib, bcrypt for password hashing
+- Login API with validations
