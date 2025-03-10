@@ -5,6 +5,9 @@ const User=require('./models/user');
 const user = require("./models/user");
 const validateSignUpData = require("./utils/validateSignUpData");
 const bcrypt =require("bcrypt")
+const cookieParser=require("cookie-parser")
+const jwt=require("jsonwebtoken");
+const { userAuth } = require("./middlewares/auth");
 connectDB().then(()=>{
     console.log('db connected !')
     app.listen(1262, () => {
@@ -15,7 +18,7 @@ connectDB().then(()=>{
     console.log('db cannot be connected ',err)
 })
 app.use(express.json())    // converts json from request to js object      used to convert body to pass to user model to save in db
-
+app.use(cookieParser())
 // create user
 app.post('/signup',async(req,res)=>{
     console.log(req.body)
@@ -63,8 +66,14 @@ app.post('/login',async(req,res)=>{
         if(!userinDB){
             throw new Error("Invalid Credentials")
         }
-        const checkPassword=await bcrypt.compare(password, userinDB.password)
+        // const checkPassword=await bcrypt.compare(password, userinDB.password)
+        const checkPassword=userinDB.validatePassword(password)
         if(checkPassword){
+            //if password is correct create jwt token
+            // const token=await jwt.sign({_id:userinDB.id},"DEV@SPHERE1.0",{expiresIn:"1d"})
+            const token=await userinDB.getJWT()
+            // set jwt token to cookie
+            res.cookie("token",token,{expires:new Date(Date.now()+8*3600000)})
             res.send("logged in successfully")
         }
         else{
@@ -75,23 +84,44 @@ app.post('/login',async(req,res)=>{
         res.send("ERROR: "+err.message)
     }
 })
-
-// find user
-app.get('/user',async (req,res)=>{
-    const userEmail=req.body.emailId;
+app.get('/profile',userAuth,async(req,res)=>{
     try{
-        const users=await User.find({emailId:userEmail})
-        if (users.length===0){
-            res.status(404).send('User not found')
-        }
-        else{
-            res.send(users)
-        }
+        const user=req.user;
+            res.send(user)
     }
-    catch{
-        res.status(400).send('Something went wrong')
+    catch(err){
+        res.send("ERROR: "+err.message)
     }
 })
+
+app.get('/connectionrequest',userAuth,async(req,res)=>{
+    try{
+        const user=req.user;
+        res.send(user.firstName+" is sending a connection request")
+    }
+    catch(err){
+        res.send("ERROR: "+err.message)
+    }
+
+
+})
+
+// find user
+// app.get('/user',async (req,res)=>{
+//     const userEmail=req.body.emailId;
+//     try{
+//         const users=await User.find({emailId:userEmail})
+//         if (users.length===0){
+//             res.status(404).send('User not found')
+//         }
+//         else{
+//             res.send(users)
+//         }
+//     }
+//     catch{
+//         res.status(400).send('Something went wrong')
+//     }
+// })
 
 
 // feed get all users

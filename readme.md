@@ -12,3 +12,7 @@
 - created read, delete, update user API 
 - Data sanitizing - added Schema(DB), API level validations, timestamp, validator lib, bcrypt for password hashing
 - Login API with validations
+- installed cookie-parser, jsonwebtoken, create jwt token,set secret info, send it to user on login successful
+- read cookies in profile api and find the logged in user
+- userAuth middleware and used it in profile api, set expiry for jwt token and cookie
+- moved method to compare and create jwt token to userSchema methods.
