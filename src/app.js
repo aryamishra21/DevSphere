@@ -2,7 +2,10 @@ const express = require("express");
 const app = express();
 const connectDB=require('./config/database')
 const User=require('./models/user');
-const user = require("./models/user");
+const authRouter=require('./routes/auth')
+const profileRouter=require('./routes/profile')
+const requestRouter=require('./routes/request')
+
 const validateSignUpData = require("./utils/validateSignUpData");
 const bcrypt =require("bcrypt")
 const cookieParser=require("cookie-parser")
@@ -17,94 +20,98 @@ connectDB().then(()=>{
 .catch((err)=>{
     console.log('db cannot be connected ',err)
 })
+
 app.use(express.json())    // converts json from request to js object      used to convert body to pass to user model to save in db
 app.use(cookieParser())
+app.use('/',authRouter);
+app.use('/',profileRouter);
+app.use('/',requestRouter);
+
+
 // create user
-app.post('/signup',async(req,res)=>{
-    console.log(req.body)
-    // creates new instance of user model
-    // const user=new User(req.body)
+// app.post('/signup',async(req,res)=>{
+//     console.log(req.body)
+//     // creates new instance of user model
+//     // const user=new User(req.body)
     
-    try{ 
-        //validation of data
-        validateSignUpData(req)
-        const {firstName,lastName,emailId,password}=req.body
-        const checkEmail=await User.findOne({emailId:emailId})
-        if(checkEmail){
-            throw new Error("User already exists")
-        }
+//     try{ 
+//         //validation of data
+//         validateSignUpData(req)
+//         const {firstName,lastName,emailId,password}=req.body
+//         const checkEmail=await User.findOne({emailId:emailId})
+//         if(checkEmail){
+//             throw new Error("User already exists")
+//         }
         
-        //Encrypt the password
-        const passwordHash= await bcrypt.hash(password, 10);
+//         //Encrypt the password
+//         const passwordHash= await bcrypt.hash(password, 10);
         
-        const user=new User({
-            firstName,
-            lastName,
-            emailId,
-            password:passwordHash
-        })
-        await user.save()
-        res.send('User added successfully')
-    }
-    catch(err){
-        res.status(400).send('Error occured while adding user: '+ err.message)
-    }
-    // const user=new User({
-    //     firstName:'Aa',
-    //     lastName:'ra',
-    //     emailId:'ar@gmail.com'
-    // })
-    // await user.save()
-    // res.send('User created successfully')
-})
+//         const user=new User({
+//             firstName,
+//             lastName,
+//             emailId,
+//             password:passwordHash
+//         })
+//         await user.save()
+//         res.send('User added successfully')
+//     }
+//     catch(err){
+//         res.status(400).send('Error occured while adding user: '+ err.message)
+//     }
+//     // const user=new User({
+//     //     firstName:'Aa',
+//     //     lastName:'ra',
+//     //     emailId:'ar@gmail.com'
+//     // })
+//     // await user.save()
+//     // res.send('User created successfully')
+// })
 
-app.post('/login',async(req,res)=>{
-    const {emailId, password}=req.body
-    try{
-        const userinDB=await User.findOne({emailId:emailId})
-        console.log(userinDB)
-        if(!userinDB){
-            throw new Error("Invalid Credentials")
-        }
-        // const checkPassword=await bcrypt.compare(password, userinDB.password)
-        const checkPassword=userinDB.validatePassword(password)
-        if(checkPassword){
-            //if password is correct create jwt token
-            // const token=await jwt.sign({_id:userinDB.id},"DEV@SPHERE1.0",{expiresIn:"1d"})
-            const token=await userinDB.getJWT()
-            // set jwt token to cookie
-            res.cookie("token",token,{expires:new Date(Date.now()+8*3600000)})
-            res.send("logged in successfully")
-        }
-        else{
-            throw new Error("Invalid Credentials")
-        }
-    }
-    catch(err){
-        res.send("ERROR: "+err.message)
-    }
-})
-app.get('/profile',userAuth,async(req,res)=>{
-    try{
-        const user=req.user;
-            res.send(user)
-    }
-    catch(err){
-        res.send("ERROR: "+err.message)
-    }
-})
+// app.post('/login',async(req,res)=>{
+//     const {emailId, password}=req.body
+//     try{
+//         const userinDB=await User.findOne({emailId:emailId})
+//         console.log(userinDB)
+//         if(!userinDB){
+//             throw new Error("Invalid Credentials")
+//         }
+//         // const checkPassword=await bcrypt.compare(password, userinDB.password)
+//         const checkPassword=userinDB.validatePassword(password)
+//         if(checkPassword){
+//             //if password is correct create jwt token
+//             // const token=await jwt.sign({_id:userinDB.id},"DEV@SPHERE1.0",{expiresIn:"1d"})
+//             const token=await userinDB.getJWT()
+//             // set jwt token to cookie
+//             res.cookie("token",token,{expires:new Date(Date.now()+8*3600000)})
+//             res.send("logged in successfully")
+//         }
+//         else{
+//             throw new Error("Invalid Credentials")
+//         }
+//     }
+//     catch(err){
+//         res.send("ERROR: "+err.message)
+//     }
+// })
+// app.get('/profile',userAuth,async(req,res)=>{
+//     try{
+//         const user=req.user;
+//             res.send(user)
+//     }
+//     catch(err){
+//         res.send("ERROR: "+err.message)
+//     }
+// })
 
-app.get('/connectionrequest',userAuth,async(req,res)=>{
-    try{
-        const user=req.user;
-        res.send(user.firstName+" is sending a connection request")
-    }
-    catch(err){
-        res.send("ERROR: "+err.message)
-    }
-
-
-})
+// app.get('/connectionrequest',userAuth,async(req,res)=>{
+//     try{
+//         const user=req.user;
+//         res.send(user.firstName+" is sending a connection request")
+//     }
+//     catch(err){
+//         res.send("ERROR: "+err.message)
+//     }
+// })
 
 // find user
 // app.get('/user',async (req,res)=>{

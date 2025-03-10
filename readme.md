@@ -16,3 +16,29 @@
 - read cookies in profile api and find the logged in user
 - userAuth middleware and used it in profile api, set expiry for jwt token and cookie
 - moved method to compare and create jwt token to userSchema methods.
+- added routes and categorized apis in routes and auth, profile route apis complete
+
+
+# APIs
+
+## authRouter
+- POST /signup
+- POST /login
+- POST /logout
+
+## profileRouter
+- GET profile/view
+- PATCH profile/edit
+- PATCH profile/password
+
+## connectionRequestRouter
+Status:- ignore, interested, accepted, rejected
+- POST request/send/interested/:userId
+- POST request/send/ignored/:userId
+- POST request/send/accepted/:requestId
+- POST request/send/rejected/:requestId
+
+## userRouter
+- GET user/connections
+- GET user/feed
+- GET user/requests
