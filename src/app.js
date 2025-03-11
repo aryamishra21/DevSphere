@@ -13,7 +13,7 @@ const jwt=require("jsonwebtoken");
 const { userAuth } = require("./middlewares/auth");
 connectDB().then(()=>{
     console.log('db connected !')
-    app.listen(1262, () => {
+    app.listen(8888, () => {
       console.log("server started at 1262");
     });
 })

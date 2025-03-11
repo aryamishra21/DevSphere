@@ -17,6 +17,7 @@
 - userAuth middleware and used it in profile api, set expiry for jwt token and cookie
 - moved method to compare and create jwt token to userSchema methods.
 - added routes and categorized apis in routes and auth, profile route apis complete
+- created connectionrequestSchema, API , used logical $or query, index(compound index), schema.pre("save")
 
 
 # APIs
