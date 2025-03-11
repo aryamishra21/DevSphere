@@ -10,7 +10,8 @@ const validateSignUpData = require("./utils/validateSignUpData");
 const bcrypt =require("bcrypt")
 const cookieParser=require("cookie-parser")
 const jwt=require("jsonwebtoken");
-const { userAuth } = require("./middlewares/auth");
+const { userAuth } = require("./middlewares/userAuth");
+const userRouter = require("./routes/user");
 connectDB().then(()=>{
     console.log('db connected !')
     app.listen(8888, () => {
@@ -26,6 +27,8 @@ app.use(cookieParser())
 app.use('/',authRouter);
 app.use('/',profileRouter);
 app.use('/',requestRouter);
+app.use('/',userRouter);
+
 
 
 // create user

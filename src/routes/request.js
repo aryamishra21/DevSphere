@@ -1,7 +1,7 @@
 const express = require("express");
-const { userAuth } = require("../middlewares/auth");
+const { userAuth } = require("../middlewares/userAuth");
 const requestRouter = express.Router();
-const connectionRequest = require("../models/connectionRequest");
+const ConnectionRequest = require("../models/connectionRequest");
 const User=require("../models/user")
 requestRouter.post('/request/send/:status/:toUserId',userAuth,async(req,res)=>{
     try{
@@ -20,7 +20,7 @@ requestRouter.post('/request/send/:status/:toUserId',userAuth,async(req,res)=>{
             res.status(400).send("User not found.")
         }
         // to check if connection request already exists
-        const existingConnection=await connectionRequest.findOne({
+        const existingConnection=await ConnectionRequest.findOne({
             $or:[
                 {fromUserId,toUserId},
                 {fromUserId:toUserId,toUserId:fromUserId},
@@ -30,17 +30,43 @@ requestRouter.post('/request/send/:status/:toUserId',userAuth,async(req,res)=>{
         if(existingConnection){
            return res.status(400).send({message:"Connection request already exists."})
         }
-        const connection=new connectionRequest({
+        const connection=new ConnectionRequest({
             fromUserId,
             toUserId,
             status
         })
-        console.log(connection,user,toUserId)
+        // console.log(connection,user,toUserId)
         await connection.save()
         res.send(status=="interested"?user.firstName+" is sending a connection request":user.firstName+" ignored "+isToUserIdInDB.firstName)
     }
     catch(err){
-        res.send("ERROR: "+err.message)
+        res.status(400).send("ERROR: "+err.message)
     }
 })
+
+
+requestRouter.post('/request/review/:status/:requestId',userAuth,async(req,res)=>{
+    // api status - accepted ,rejected
+    // connectionreq- _id-requestId, toUserId-loggedinuserid, status-interested
+    try{
+        const loggedInUser=req.user
+        const{status,requestId}=req.params
+        const ALLOWED_STATUS=["accepted","rejected"]
+        if(!ALLOWED_STATUS.includes(status)){
+            return res.status(400).json({message: status + " status not allowed!"})
+        }
+        const connectionRequest=await ConnectionRequest.findOne({_id:requestId,toUserId:loggedInUser._id,status:"interested"})
+        console.log(connectionRequest)
+        if(!connectionRequest){
+            return res.status(404).json({message:" Request not found!"})
+        }
+        connectionRequest.status=status
+        const data=await connectionRequest.save()
+        res.json({"message":"Connection Request "+status,data})
+    }
+    catch(err){
+        res.status(400).send("ERROR: "+err.message)
+    }
+})
+
 module.exports=requestRouter

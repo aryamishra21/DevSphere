@@ -2,10 +2,12 @@ const mongoose=require("mongoose")
 
 const connectionSchema=new mongoose.Schema({
     fromUserId:{
-        type:mongoose.Schema.ObjectId
+        type:mongoose.Schema.ObjectId,
+        ref:"User"
     },
     toUserId:{
-        type:mongoose.Schema.ObjectId
+        type:mongoose.Schema.ObjectId,
+        ref:"User"
     },
     status:{
         type:String,

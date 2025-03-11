@@ -18,7 +18,7 @@
 - moved method to compare and create jwt token to userSchema methods.
 - added routes and categorized apis in routes and auth, profile route apis complete
 - created connectionrequestSchema, API , used logical $or query, index(compound index), schema.pre("save")
-
+- request send/review api, userRouter, request/received request/connections api, ref, populate
 
 # APIs
 
@@ -34,10 +34,8 @@
 
 ## connectionRequestRouter
 Status:- ignore, interested, accepted, rejected
-- POST request/send/interested/:userId
-- POST request/send/ignored/:userId
-- POST request/send/accepted/:requestId
-- POST request/send/rejected/:requestId
+- POST request/send/:status/:userId       // interested or ignored
+- POST request/review/:status/:requestId  // accepted or rejected
 
 ## userRouter
 - GET user/connections
