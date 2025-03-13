@@ -19,6 +19,9 @@
 - added routes and categorized apis in routes and auth, profile route apis complete
 - created connectionrequestSchema, API , used logical $or query, index(compound index), schema.pre("save")
 - request send/review api, userRouter, request/received request/connections api, ref, populate
+- user/feed api with logical operators like $nin (not in) $ne (not equals), pagination with skip, limit, request query
+- fixed cors restriction added domain , withCredentials for cookies
+
 
 # APIs
 

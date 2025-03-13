@@ -1,5 +1,5 @@
 const express=require("express");
-const validateSignUpData = require("../utils/validateSignUpData");
+const {validateSignUpData} = require("../utils/validateSignUpData");
 const authRouter=express.Router();
 const User=require('../models/user')
 const bcrypt=require('bcrypt')
@@ -40,7 +40,7 @@ authRouter.post('/login',async(req,res)=>{
         else{
             const token=await userInDB.getJWT()
             res.cookie("token",token,{expires:new Date(Date.now()+8*3600000)})
-            res.send('Login successful!')
+            res.send(userInDB)
         }
     }
     catch(err){
